@@ -21,7 +21,7 @@ export default function Nav() {
     { to: "/", icon: "home" },
     { to: "/sheets", icon: "assignment" },
     { to: "/boosts", icon: "local_fire_department" },
-    { to: "/tools", icon: "image" },
+    { to: "/photo", icon: "image" },
   ]
 
   return (

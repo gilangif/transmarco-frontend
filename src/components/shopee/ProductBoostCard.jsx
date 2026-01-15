@@ -22,7 +22,7 @@ export default function ProductBoostCard({ image, id, boost_id, cool_down_second
   }, [counter])
 
   return (
-    <div className="col-4 col-lg-2 p-1" style={{ display: show ? "block" : "none" }}>
+    <div className="col-6 col-lg-4 p-1" style={{ display: show ? "block" : "none" }}>
       <div className="card h-100 border border-0 nocursor">
         <div className="img-hover-wrapper">
           <img src={image} className="card-img-top" alt={name} />

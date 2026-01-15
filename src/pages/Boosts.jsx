@@ -18,6 +18,11 @@ export default function Boosts() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
+  const logoutHandler = () => {
+    dispatch(logout())
+    navigate("/login")
+  }
+
   const getBoosts = async () => {
     try {
       const { data } = await axios.get(host + "/shopee/boosts", { headers: { Authorization: `Bearer ${accessToken}` } })
@@ -55,7 +60,7 @@ export default function Boosts() {
 
   return (
     <div className="container">
-      <div className="d-flex px-2 py-3">
+      <div className="d-flex px-1 py-3">
         <div className="d-flex flex-column w-100 justify-content-center align-items-start">
           <h1 className="m-0 nocursor">Product Dashboard</h1>
           <p className="m-0 nocursor">Total {boosts.length} product boosted</p>
@@ -66,7 +71,7 @@ export default function Boosts() {
           </span>
         </div>
       </div>
-      <div className="row justify-content-start p-1 m-0 mb-3">
+      <div className="row justify-content-start p-0 m-0 mb-3">
         {boosts.map((boost, i) => {
           const { id, boost_id, cool_down_seconds, date, name, detail, estimate } = boost
           const { images = [] } = detail || {}

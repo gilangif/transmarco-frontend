@@ -8,9 +8,9 @@ export const getStock = createAsyncThunk("sheets/getStock", async (_, { getState
   try {
     const { data } = await axios.get(host + "/sheets", { headers: { Authorization: `Bearer ${getState().auth.accessToken}` } })
 
-    if (data.failed) throw data
+    const username = getState().auth.username.toUpperCase()
 
-    return data.sort((a, b) => a.ARTIKEL - b.ARTIKEL)
+    return data.filter((x) => (username === "app" ? true : x.brand === username)).sort((a, b) => a.artikel - b.artikel)
   } catch (err) {
     return rejectWithValue(err.response?.data || "Gagal fetch stock")
   }
@@ -20,7 +20,7 @@ const sheetSlice = createSlice({
   name: "sheets",
   initialState: {
     stocks: [],
-    fields: ["S", "M", "L", "XL", "XXL", "XXXL", "26", "28", "30", "32", "36", "38", "TTL"],
+    fields: ["S", "M", "L", "XL", "XXL", "XXXL", "26", "28", "30", "32", "34", "36", "38", "TTL"],
     type: { field: "stock", name: "SALDO AKHIR" },
     loading: false,
     error: false,

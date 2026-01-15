@@ -56,7 +56,6 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
-    console.log("object", search)
     const timer = setTimeout(() => {
       if (search) {
         setFilter(orders.filter((x) => JSON.stringify(x).toUpperCase().includes(search.toUpperCase())))

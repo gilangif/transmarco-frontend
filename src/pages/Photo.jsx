@@ -6,7 +6,7 @@ import { toast } from "react-toastify"
 import axios from "axios"
 import JSZip from "jszip"
 
-export default function Tools() {
+export default function Photo() {
   const { host } = useSelector((s) => s.config)
 
   const [value, setValue] = useState("")
@@ -31,7 +31,7 @@ export default function Tools() {
 
       if (query) setQuery(query)
 
-      const { data } = await axios.post(host + "/generator/photo", { target })
+      const { data } = await axios.post(host + "/tools/photo", { target })
 
       const message = `Success generate ${data.length} media album with total ${data.flat().length} photo.`
 
@@ -117,13 +117,13 @@ export default function Tools() {
       <div className="container py-2">
         <form onSubmit={(e) => generatePhotos(e)}>
           <div className="d-flex flex-column justify-content-center align-items-center py-3">
-            <div class="alert alert-success" role="alert">
-              <h4 class="alert-heading">IMAGE DOWNLOADER</h4>
+            <div className="alert alert-success" role="alert">
+              <h4 className="alert-heading">IMAGE DOWNLOADER</h4>
               <p className="fw-bold">ZALORA, HUSH PUPPIES, AND 9TO9 WEBSITE SUPPORTED, THIS SITE CREATED AND DEVELOPED BY GILANG IF.</p>
               {value && (
                 <>
                   <hr />
-                  <p class="mb-0">
+                  <p className="mb-0">
                     Show {photos.flat().length} photo from {photos.length} result by search "{value}"
                   </p>
                 </>
@@ -131,10 +131,10 @@ export default function Tools() {
 
               {photos.length > 1 && (
                 <div className="d-flex flex-column gap-2 py-1 my-3">
-                  <button className="btn btn-sm btn-danger w-100 p-3" onClick={() => downloadImageBulk(photos.flat())}>
+                  <button type="button" className="btn btn-sm btn-danger w-100 p-3" onClick={() => downloadImageBulk(photos.flat())}>
                     SAVE ALL {photos.flat().length} PHOTO AS JPEG
                   </button>
-                  <button className="btn btn-sm btn-success w-100 p-3" onClick={() => downloadZip(photos, `BULK ${query.toUpperCase()} ${Date.now()}.zip`, true)}>
+                  <button type="button" className="btn btn-sm btn-success w-100 p-3" onClick={() => downloadZip(photos, `BULK ${query.toUpperCase()} ${Date.now()}.zip`, true)}>
                     SAVE ALL {photos.flat().length} PHOTO AS ZIP
                   </button>
                 </div>
@@ -159,7 +159,7 @@ export default function Tools() {
       <div className="py-3">
         {photos.map((media, i) => {
           const title = `${media[0]?.title} ${media[0]?.variant}`
-          const zipname = `BULK ${title} ${media[0].merchant} ${Date.now()}.zip`
+          const zipname = `BULK ${title} ${media[0]?.merchant} ${Date.now()}.zip`
 
           return (
             <div className="container py-3" key={i}>
@@ -201,7 +201,7 @@ export default function Tools() {
                       </div>
 
                       <div className="p-1">
-                        <a className="btn btn-success btn-sm fw-bold w-100" onClick={() => downloadImage(photo.url, photo.file)}>
+                        <a className="btn btn-success btn-sm fw-bold w-100" type="button" onClick={() => downloadImage(photo.url, photo.file)}>
                           DOWNLOAD
                         </a>
                       </div>

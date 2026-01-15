@@ -14,10 +14,11 @@ import currrency from "../utils/currency.js"
 
 export default function Sheets() {
   const { stocks, fields, type, loading, error } = useSelector((s) => s.sheets)
+  const { username } = useSelector((s) => s.auth)
 
   const [isOpen, setOpen] = useState(false)
   const [filter, setFilter] = useState([])
-  const [inventory, setInventory] = useState([])
+  const [arr, setArr] = useState([])
 
   const [target, setTarget] = useState({})
   const [search, setSearch] = useState("")
@@ -26,9 +27,7 @@ export default function Sheets() {
   const dispatch = useDispatch()
 
   const openSheet = (item) => {
-    const arr = stocks.filter((x) => x.ARTIKEL === item.ARTIKEL)
-
-    setInventory(arr)
+    setArr(stocks.filter((x) => x.artikel === item.artikel))
     setTarget(item)
     setOpen(true)
   }
@@ -72,7 +71,7 @@ export default function Sheets() {
     const timer = setTimeout(() => {
       if (search) {
         const s = search.toUpperCase()
-        const arr = stocks.filter((x) => x.ART?.includes(s) || x.DESC?.includes(s) || x.ARTIKEL?.includes(s) || x.BRAND?.includes(s))
+        const arr = stocks.filter((x) => x.art?.includes(s) || x.desc?.includes(s) || x.artikel?.includes(s) || x.brand?.includes(s))
 
         setFilter(arr)
       }
@@ -84,7 +83,7 @@ export default function Sheets() {
   return (
     <div className="container bg-dark py-4">
       <h1>HUSH PUPPIES APPAREL</h1>
-      <p>HPAL & HPAM</p>
+      <p>{username.toUpperCase()}</p>
 
       <div className="d-flex w-100 py-2">
         <input type="text" className="form-control py-2 w-100 search-form nocursor" onChange={(e) => setSearch(e.target.value)} />
@@ -100,13 +99,13 @@ export default function Sheets() {
                   <div className="d-flex">
                     <div className="col d-flex flex-column justify-content-center align-items-start text-dark px-2">
                       <h5 className="fw-bold m-0 text-uppercase">
-                        {target["BRAND"]} {target["DESC"]}
+                        {target["brand"]} {target["desc"]}
                       </h5>
-                      <p className="m-0 fw-bold">{target["ART"]}</p>
-                      <p className="m-0 py-1">{inventory.length} variant</p>
+                      <p className="m-0 fw-bold">{target["art"]}</p>
+                      <p className="m-0 py-1">{arr.length} variant</p>
                     </div>
                     <div className="d-flex justify-content-center align-items-center gap-3 text-dark nocursor">
-                      <span className="material-symbols-outlined p-2 fw-bold nocursor" onClick={() => navigate(`/shopee?id=${target["SHOPEE"]}`)} style={{ fontSize: "2.1rem" }}>
+                      <span className="material-symbols-outlined p-2 fw-bold nocursor" onClick={() => navigate(`/shopee?id=${target["shopee_id"]}`)} style={{ fontSize: "2.1rem" }}>
                         warehouse
                       </span>
                       <span className="material-symbols-outlined p-2 fw-bold nocursor" style={{ fontSize: "2.1rem" }} onClick={() => setOpen(false)}>
@@ -116,50 +115,64 @@ export default function Sheets() {
                   </div>
                 </Sheet.Header>
                 <Sheet.Content>
-                  <TableSheetStock sheets={inventory} fields={fields} />
+                  <TableSheetStock arr={arr} fields={fields} />
                 </Sheet.Content>
               </Sheet.Container>
               <Sheet.Backdrop onTap={() => setOpen(false)} />
             </Sheet>
 
-            {filter.map((item, item_index) => {
-              const params = "STOCK AKHIR"
-              const stock = item[params]
+            {filter.map((item, i) => {
+              const artikel = item["artikel"] || ""
+              const desc = item["desc"] || ""
+              const brand = item["brand"] || ""
+
+              const price = item["price"]
+              const promo = item["promo"]
+              const netto = item["netto"]
+              const disc = item["disc"]
+
+              const lazada_id = item["lazada_id"] || "-"
+              const shopee_id = item["shopee_id"] || "-"
+              const reff_code = item["reff_code"] || "-"
+
+              const inventory = item["inventory_field"]
 
               return (
-                <tr key={item["ARTIKEL"]} className="text-center">
+                <tr key={artikel} className="text-center">
                   <td scope="row" className="text-center align-middle">
-                    {item_index + 1}
+                    {i + 1}
                   </td>
                   <td className="text-center align-middle" onClick={() => openSheet(item)}>
-                    {item["ARTIKEL"]}
+                    {artikel}
                   </td>
-                  <td className="text-center align-middle" onClick={() => navigate(`/shopee?id=${item.SHOPEE}`)}>
-                    {item["DESC"]}
+                  <td className="text-center align-middle" onClick={() => navigate(`/shopee?id=${shopee_id}`)}>
+                    {desc}
                   </td>
-                  <td className="text-center align-middle">{item["BRAND"]}</td>
+                  <td className="text-center align-middle">{brand}</td>
 
-                  {fields.map((field, field_index) => {
-                    const key = item["ARTIKEL"] + field
-                    const style = field === "TTL" ? "text-info" : field < 0 ? "text-danger" : ""
+                  {fields.map((field, j) => {
+                    const stock = field !== "TTL" && !inventory[j] ? "" : inventory[j]
+                    const style = field === "TTL" ? "text-info" : stock < 0 ? "text-danger" : ""
 
                     return (
-                      <td key={field_index} className={`text-center align-middle fw-bold ${style}`}>
-                        {stock[key] || ""}
+                      <td key={j} className={`text-center align-middle fw-bold ${style}`}>
+                        {stock}
                       </td>
                     )
                   })}
 
-                  <td className="text-center align-middle">{currrency(item["PRICE"])}</td>
-                  <td className="text-center align-middle">{item["PROMO"]}</td>
-                  <td className="text-center align-middle">{item["DISC"]}</td>
-                  <td className="text-center align-middle">{currrency(item["NETTO"])}</td>
+                  <td className="text-center align-middle">{currrency(price)}</td>
+                  <td className="text-center align-middle">{promo}</td>
+                  <td className="text-center align-middle">{disc}</td>
+                  <td className="text-center align-middle">{currrency(netto)}</td>
 
-                  <td className="text-center align-middle">{item["REFF CODE"]}</td>
+                  <td className="text-center align-middle">{reff_code}</td>
                   <td className="text-center align-middle">
-                    <Link to={`/shopee?id=${item.SHOPEE}`}> {item["SHOPEE"]}</Link>
+                    <Link to={`/shopee?id=${shopee_id}`} className="text-light text-decoration-none fw-bold">
+                      {shopee_id}
+                    </Link>
                   </td>
-                  <td className="text-center align-middle">{item["LAZADA"]}</td>
+                  <td className="text-center align-middle">{lazada_id}</td>
                 </tr>
               )
             })}

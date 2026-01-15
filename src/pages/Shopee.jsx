@@ -81,22 +81,18 @@ export default function Shopee() {
         const seller_stock_info = stock_detail.seller_stock_info
 
         const stock_setting_list = seller_stock_info.map((stock) => {
-          const { location_id, location_name, fixed_reserved_stock, is_disabled, edit_value, sellable_stock } = stock
+          const { location_id, location_name, fixed_reserved_stock, is_disabled, sellable_stock } = stock
 
-          const obj = { location_id, location_name, fixed_reserved_stock, is_disabled, edit_value, sellable_stock }
+          const obj = { location_id, location_name, fixed_reserved_stock, is_disabled, sellable_stock }
 
-          const unique = id + "_" + location_id
-          const find = form[unique]
+          if (form[id]) {
+            const find = form[id].find((x) => x.location_name === location_name)
 
-          if (find) {
-            obj.sellable_stock_default = sellable_stock
+            if (find) obj.sellable_stock = find.edit_stock || find.sellable_stock || 0
 
-            obj.edit_value = find.edit_value
-            obj.sellable_stock = find.edit_value
+            if (find && find.edit_stock < 0) status.err.push(`${variant_id} jumlah stock ${find.edit_stock} pcs tidak valid, harus diatas 0 pcs`)
+            if (find && find.edit_stock !== sellable_stock) status.success.push(`${variant_id} dirubah dari ${sellable_stock} pcs menjadi ${find.edit_stock} pcs`)
           }
-
-          if (find && find.edit_value < 0) status.err.push(`${variant_id} jumlah stock ${find.edit_value} pcs tidak valid, harus diatas 0 pcs`)
-          if (find && find.edit_value !== sellable_stock) status.success.push(`${variant_id} dirubah dari ${sellable_stock} pcs menjadi ${find.edit_value} pcs`)
 
           return obj
         })
@@ -104,39 +100,15 @@ export default function Shopee() {
         return { id, tier_index, stock_setting_list }
       })
 
-      const toast_option = { position: "top-right", autoClose: 1000, hideProgressBar: true, closeOnClick: false, pauseOnHover: false, draggable: true, progress: undefined, theme: "colored" }
+      const toast_option = { position: "top-right", autoClose: 2500, hideProgressBar: true, closeOnClick: false, pauseOnHover: false, draggable: true, progress: undefined, theme: "colored" }
 
       if (status.err.length > 0) status.err.forEach((x) => toast.error(x, toast_option))
       if (status.success.length === 0) return toast.info("Semua field stock dan stock shopee saat ini masih sama, perubahan tidak akan diterapkan !", toast_option)
 
       const { data } = await axios.post(host + "/shopee/update", { product_id, model_list }, { headers: { Authorization: `Bearer ${accessToken}` } })
 
-      if (data.msg && data.msg === "success") {
-        const variants = product.variants.map((variant) => {
-          const charts = variant.charts.map((chart) => {
-            const model = chart.model
-
-            const stock_detail = model.stock_detail
-
-            const seller_stock_info = stock_detail.seller_stock_info.map((stock) => {
-              const unique = model.id + "_" + stock.location_id
-              const sellable_stock = form[unique].edit_value || stock.sellable_stock
-
-              return { ...stock, sellable_stock }
-            })
-
-            return { ...chart, model: { ...model, stock_detail: { ...stock_detail, seller_stock_info } } }
-          })
-
-          return { ...variant, charts }
-        })
-
-        const prod = { ...product, variants }
-
-        setShow(false)
-        setProduct(prod)
-
-        status.success.forEach((x, i) => toast.success(x, { ...toast_option, autoClose: 1500 + i * 10 }))
+      if (data.msg || data.user_message) {
+        toast.info(data.msg || data.user_message, toast_option)
       }
     } catch (error) {
       const status = error.status && typeof error.status === "number" ? error.status : error.response && error.response.status ? error.response.status : 500
@@ -160,15 +132,17 @@ export default function Shopee() {
     }
   }
 
-  const editValue = (val, unique, index) => {
+  const editValue = (val, id, location_id) => {
     const value = val === "" ? "" : Number(val)
-    const stock = form[unique]["STOCK AKHIR"]
 
-    const obj = { ...form, [unique]: { ...form[unique], stock, edit_value: value } }
+    const target = form[id]
+    const find = target.find((x) => x.location_id === location_id)
 
-    if (value > stock) {
-      const message = `Jumlah input melebihi stock tersedia sebanyak ${stock} pcs`
-      toast.warning(message, { position: "top-right", autoClose: 3000, hideProgressBar: true, closeOnClick: false, pauseOnHover: false, draggable: true, progress: undefined, theme: "colored" })
+    const obj = { ...form, [id]: target.map((x) => (x.location_id === location_id ? { ...x, edit_stock: value } : x)) }
+
+    if (value > find.stock && find.artikel) {
+      const message = `Jumlah input melebihi saldo tersedia sebanyak ${find.stock} pcs`
+      toast.info(message, { position: "top-right", autoClose: 3000, hideProgressBar: true, closeOnClick: false, pauseOnHover: false, draggable: true, progress: undefined, theme: "colored" })
     }
 
     setForm(obj)
@@ -180,24 +154,26 @@ export default function Shopee() {
     let status = true
 
     product?.variants?.forEach((variant) => {
-      variant.charts.forEach((chart) => {
-        const model = chart.model || {}
-        const sheets = chart.sheets || {}
+      const { option, cover, fields } = variant
+
+      fields.forEach((field) => {
+        const stock = field.stock
+        const model = field.model
+        const artikel = field.artikel
+
         const id = model.id
+        const sku = model.sku
+        const stock_detail = model.stock_detail
 
-        if (!chart.sheets) status = false
+        const seller_stock_info = stock_detail.seller_stock_info.map((x) => {
+          const { sellable_stock, location_id } = x
 
-        chart.model.stock_detail.seller_stock_info.forEach((stock) => {
-          const location_id = stock.location_id
-          const sellable_stock = stock.sellable_stock
+          const edit_stock = reset ? 0 : location_id === "IDZ" ? (Object.hasOwn(field, "stock") && artikel ? stock : sellable_stock) : sellable_stock
 
-          const unique = id + "_" + location_id
-
-          const edit_value = reset ? 0 : location_id === "IDZ" ? sheets["STOCK AKHIR"] || sellable_stock : sellable_stock
-          const stock_sheets = chart.sheets ? true : false
-
-          if (!initial[unique]) initial[unique] = { ...sheets, ...stock, edit_value, stock_sheets }
+          return { ...x, stock, artikel, id, sku, edit_stock }
         })
+
+        initial[id] = seller_stock_info
       })
     })
 
@@ -240,12 +216,12 @@ export default function Shopee() {
           <div className="my-3">
             <ProductTitle
               name={product.name}
-              category={product.category_path_name_list.join(" > ")}
+              category={product?.category_path_name_list?.join(" > ")}
               desc={desc}
               date={product.create_time}
               sku={product.parent_sku}
               id={product.id}
-              weight={product.weight.value}
+              weight={product?.weight?.value}
             />
           </div>
         )}
@@ -254,7 +230,7 @@ export default function Shopee() {
 
         <div className="col-12 col-lg-5 p-2 m-0">
           {product?.sheets?.length > 0 ? (
-            <TableSheetStock fields={fields} sheets={product?.sheets} />
+            <TableSheetStock arr={product?.sheets} />
           ) : (
             <ProductTitle
               name={product.name}
@@ -270,40 +246,32 @@ export default function Shopee() {
 
         <div className="col-lg-7 p-2 p-lg-2" style={{ paddingBottom: "200px" }}>
           {product?.variants?.map((variant, i) => {
-            const src = variant.image ? `https://down-id.img.susercontent.com/file/${variant.image}` : ""
+            const src = variant.cover ? `https://down-id.img.susercontent.com/file/${variant.cover}` : ""
 
-            const variants = variant.charts.map((chart, j) => {
-              const model = chart.model || {}
-              const opt = chart.option
+            const variants = variant.fields.map((field, j) => {
+              const model = field.model
+              const id = model.id
 
-              const variant_arr = product.variants.map((x) => x.charts.map((y) => y.model.sku)).filter((x) => x == model.sku)
+              const shopee_stock = field.model.stock_detail.seller_stock_info.map((x, k) => {
+                const { sellable_stock, edit_stock, stock, location_id } = x
 
-              const id = model.id || "VARIANT"
-              const sku = variant_arr.length > 1 ? model.id : model.sku || model.id || "VARIANT"
+                const artikel = form[id]?.find((x) => x.location_id === location_id && x.artikel)
 
-              const option = opt === "XXL" ? "2XL" : opt === "XXXL" ? "3XL" : opt === "XXXXL" ? "4XL" : opt
+                const style = `form-control text-center ${artikel ? "" : "fw-bold text-danger"}`
 
-              const shopee_stock = model.stock_detail.seller_stock_info.map((stock, k) => (
-                <input key={i + j + k} type="text" className="form-control text-center" value={stock.sellable_stock} disabled />
-              ))
+                return <input key={k} type="text" className={style} value={sellable_stock} disabled />
+              })
 
-              const edit_stock = model.stock_detail.seller_stock_info.map((stock, k) => {
-                const sellable_stock = stock.sellable_stock
-                const location_id = stock.location_id
+              const edit_stock = form[id]?.map((x, k) => {
+                const { sellable_stock, edit_stock, stock, location_id } = x
 
-                const unique = id + "_" + location_id
-
-                const inventory = form[unique]?.edit_value ?? ""
-                const stock_sheets = form[unique]?.stock_sheets
-
-                const botani = location_id === "IDZ"
+                const value = edit_stock
 
                 let style = ""
 
-                if (botani && stock_sheets && inventory && inventory > sellable_stock) style += " fw-bold text-primary"
-                if (botani && stock_sheets && inventory && inventory < sellable_stock) style += " fw-bold text-warning"
-
-                if (botani && stock_sheets && inventory && inventory < 0) style += " fw-bold text-danger"
+                if (location_id === "IDZ" && sellable_stock < edit_stock) style = "fw-bold text-primary"
+                if (location_id === "IDZ" && sellable_stock > edit_stock) style = "fw-bold text-warning"
+                if (location_id === "IDZ" && edit_stock < 0) style = "fw-bold text-danger"
 
                 return (
                   <input
@@ -311,17 +279,20 @@ export default function Shopee() {
                     type="number"
                     id={location_id}
                     className={`form-control text-center ${style}`}
-                    value={inventory}
-                    disabled={!botani}
-                    onChange={(e) => editValue(e.target.value, unique, k)}
+                    value={value}
+                    disabled={location_id !== "IDZ"}
+                    onChange={(e) => editValue(e.target.value, id, location_id)}
                   />
                 )
               })
 
               return (
                 <div className="d-flex border border-1 rounded" key={j}>
-                  <div className="col-1 p-3 border border-1 d-flex justify-content-center align-items-center rounded fw-bold">{option}</div>
-                  <div className="col border border-1 d-flex justify-content-center align-items-center rounded fw-bold">{sku}</div>
+                  <div className="col-1 p-3 border border-1 d-flex justify-content-center align-items-center rounded fw-bold">{field.option}</div>
+                  <div className="col border border-1 d-flex flex-column justify-content-center align-items-center text-center rounded fw-bold">
+                    <p className={`m-0 ${field.model.sku ? "" : "d-none"}`}>{field.model.sku}</p>
+                    <p className="m-0">{field.model.id}</p>
+                  </div>
 
                   <div className="col border border-1 d-flex justify-content-start align-items-center rounded w-100">
                     <div className="d-flex flex-column p-1 gap-1 w-100">{shopee_stock}</div>

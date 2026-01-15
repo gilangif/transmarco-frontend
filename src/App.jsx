@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 
-import Layout from "./Layout"
-import Dashboard from "./pages/Dashboard"
-import Shopee from "./pages/Shopee"
-import Sheets from "./pages/Sheets"
-import Tools from "./pages/Tools"
-import Login from "./pages/Login"
+import Layout from "./Layout.jsx"
+import Dashboard from "./pages/Dashboard.jsx"
+import Shopee from "./pages/Shopee.jsx"
+import Sheets from "./pages/Sheets.jsx"
+import Photo from "./pages/Photo.jsx"
+import Login from "./pages/Login.jsx"
 import Boosts from "./pages/Boosts.jsx"
 
 import { useSelector } from "react-redux"
@@ -28,7 +28,7 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/login" element={<Login />} />
-          <Route path="/tools" element={<Tools />} />
+          <Route path="/photo" element={<Photo />} />
         </Route>
 
         <Route element={<RequireAuth />}>
