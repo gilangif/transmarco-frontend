@@ -112,7 +112,7 @@ export default function Dashboard() {
 
                 return (
                   <div className="card rounded p-0 w-100 h-100 border border-0" key={i}>
-                    <img src={src} key={k} className="card-img-top" onDoubleClick={navigate(`/shopee?id?=${item_id}`)} />
+                    <img src={src} key={k} className="card-img-top" onDoubleClick={() => navigate(`/shopee?id?=${item_id}`)} />
 
                     <div className="card-body p-2">
                       <p className="card-title fw-bold">
