@@ -25,8 +25,15 @@ export default function Dashboard() {
 
       if (data.failed) throw data
 
-      setOrders(data)
-      setFilter(data)
+      const fil = data.sort((a, b) => {
+        const timeA = a.order_ext_info?.ship_by_date ?? a.package_ext_info?.acl1_arrange_ship_date ?? 0
+        const timeB = b.order_ext_info?.ship_by_date ?? b.package_ext_info?.acl1_arrange_ship_date ?? 0
+
+        return timeB - timeA
+      })
+
+      setOrders(fil)
+      setFilter(fil)
     } catch (error) {
       const status = error.status && typeof error.status === "number" ? error.status : error.response && error.response.status ? error.response.status : 500
       const message = error.response && error.response.data.message ? error.response.data.message : "Internal Server Error"
