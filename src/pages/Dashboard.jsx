@@ -86,7 +86,7 @@ export default function Dashboard() {
         <div className="row justify-content-center p-0 m-0 gap-2">
           {filter.map((order, i) => {
             const { card_header, item_info_group, payment_info, status_info, fulfilment_info, action_info, order_ext_info, package_ext_info } = order
-            const { item_info_list } = item_info_group || {}
+            const { item_info_list, message } = item_info_group || {}
 
             const { order_sn, buyer_info } = card_header || {}
             const { username } = buyer_info || {}
@@ -144,6 +144,13 @@ export default function Dashboard() {
                     {package_ext_info.shipping_address.slice(0, 100)}
                   </p>
                 </div>
+                {message && (
+                  <div className="alert p-2">
+                    <div class="alert alert-light" role="alert">
+                      {message}
+                    </div>
+                  </div>
+                )}
                 <div className="d-flex gap-1 p-0 h-100">{card}</div>
               </div>
             )
