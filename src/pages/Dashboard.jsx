@@ -106,12 +106,13 @@ export default function Dashboard() {
 
               return item_list.map((product, k) => {
                 const { name, image, description, amount, is_wholesale, inner_item_ext_info } = product
+                const { item_id, model_id, is_prescription_item } = inner_item_ext_info || {}
 
                 const src = `https://down-id.img.susercontent.com/file/${image}`
 
                 return (
                   <div className="card rounded p-0 w-100 h-100 border border-0" key={i}>
-                    <img src={src} key={k} className="card-img-top" />
+                    <img src={src} key={k} className="card-img-top" onDoubleClick={navigate(`/shopee?id?=${item_id}`)} />
 
                     <div className="card-body p-2">
                       <p className="card-title fw-bold">
@@ -128,8 +129,6 @@ export default function Dashboard() {
             })
 
             const cn = p.includes("INSTANT") ? "alert-danger" : ["HPAL", "HPAM", "HPSL", "HPC"].find((x) => json.includes(x)) ? "alert-info" : p.includes("DEPOK") ? "alert-warning" : "alert-success"
-
-            console.log(order_sn, message)
 
             return (
               <div className="col-12 col-lg-3 d-flex flex-column p-1 text-light rounded gap-1 bg-light">
