@@ -144,7 +144,7 @@ export default function Dashboard() {
                     {package_ext_info.shipping_address.slice(0, 100)}
                   </p>
                 </div>
-                {message && (
+                {!message && (
                   <div className="alert p-2">
                     <div class="alert alert-light" role="alert">
                       {message}
