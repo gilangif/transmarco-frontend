@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 
 export const host = "https://api.oyen.online"
+// export const host = "http://192.168.226.42:3000"
 
 const configSlice = createSlice({
   name: "sheets",

@@ -163,20 +163,18 @@ export default function Photo() {
 
           return (
             <div className="container py-3" key={i}>
-              <div className="d-flex py-4">
-                <div className="d-flex w-100 align-items-center">
-                  <h1>
-                    <Link className="text-light" to={media[0]?.source} target="_blank">
-                      {title}
-                    </Link>
-                  </h1>
-                </div>
-                <div className="d-flex gap-4 px-1">
-                  <button className="btn btn-sm btn-light text-dark fw-bold px-2 rounded-circle" style={{ scale: "1.2", aspectRatio: "1/1" }} onClick={() => downloadImageBulk(media)}>
-                    <span className="material-symbols-outlined">save_as</span>
+              <div className="d-flex flex-column py-4 gap-2">
+                <h1>
+                  <Link className="text-light" to={media[0]?.source} target="_blank">
+                    {title}
+                  </Link>
+                </h1>
+                <div className="d-flex gap-3">
+                  <button type="button" className="btn btn-sm btn-danger px-3" onClick={() => downloadImageBulk(media)}>
+                    JPEG
                   </button>
-                  <button className="btn btn-sm btn-danger text-light fw-bold px-2 rounded-circle" style={{ scale: "1.2", aspectRatio: "1/1" }} onClick={() => downloadZip(media, zipname, false)}>
-                    <span className="material-symbols-outlined">folder_zip</span>
+                  <button type="button" className="btn btn-sm btn-success px-3" onClick={() => downloadZip(media, zipname, false)}>
+                    ZIP
                   </button>
                 </div>
               </div>

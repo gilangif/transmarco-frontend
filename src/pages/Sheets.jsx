@@ -142,13 +142,15 @@ export default function Sheets() {
                   <td scope="row" className="text-center align-middle">
                     {i + 1}
                   </td>
-                  <td className="text-center align-middle" onClick={() => openSheet(item)}>
+                  <td className="text-center align-middle" onClick={() => navigate(`/shopee?id=${shopee_id}`)}>
                     {artikel}
                   </td>
                   <td className="text-center align-middle" onClick={() => navigate(`/shopee?id=${shopee_id}`)}>
                     {desc}
                   </td>
-                  <td className="text-center align-middle">{brand}</td>
+                  <td className="text-center align-middle" onClick={() => openSheet(item)}>
+                    {brand}
+                  </td>
 
                   {fields.map((field, j) => {
                     const stock = field !== "TTL" && !inventory[j] ? "" : inventory[j]
