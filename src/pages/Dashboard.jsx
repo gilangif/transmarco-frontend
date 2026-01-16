@@ -130,7 +130,7 @@ export default function Dashboard() {
             const cn = p.includes("INSTANT") ? "alert-danger" : ["HPAL", "HPAM", "HPSL", "HPC"].find((x) => json.includes(x)) ? "alert-info" : p.includes("DEPOK") ? "alert-warning" : "alert-success"
 
             return (
-              <div className="col col-lg-3 d-flex flex-column p-1 text-light rounded gap-1 bg-light">
+              <div className="col-12 col-lg-3 d-flex flex-column p-1 text-light rounded gap-1 bg-light">
                 <div class={`alert ${cn} m-0 p-2`} role="alert">
                   <h5 class="alert-heading">
                     <Link className="text-dark text-decoration-none" to={`https://seller.shopee.co.id/portal/sale/${order_id}`} target="_blank">
