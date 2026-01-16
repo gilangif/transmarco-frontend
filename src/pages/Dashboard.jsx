@@ -146,8 +146,8 @@ export default function Dashboard() {
                     {package_ext_info.shipping_address.slice(0, 100)}
                   </p>
                 </div>
-                <div className="alert p-2">
-                  <div class="alert alert-light" role="alert">
+                <div className="alert p-1" style={{ display: message ? "block" : "none" }}>
+                  <div class="alert alert-danger" role="alert">
                     {message}
                   </div>
                 </div>
