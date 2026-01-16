@@ -9,8 +9,9 @@ export const getStock = createAsyncThunk("sheets/getStock", async (_, { getState
     const { data } = await axios.get(host + "/sheets", { headers: { Authorization: `Bearer ${getState().auth.accessToken}` } })
 
     const username = getState().auth.username.toUpperCase()
+    const filter = data.filter((x) => x.brand === username)
 
-    return data.filter((x) => x.brand === username).sort((a, b) => a.artikel - b.artikel)
+    return filter.sort((a, b) => a.artikel - b.artikel)
   } catch (err) {
     return rejectWithValue(err.response?.data || "Gagal fetch stock")
   }
