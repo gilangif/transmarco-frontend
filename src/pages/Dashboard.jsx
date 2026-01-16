@@ -25,12 +25,7 @@ export default function Dashboard() {
 
       if (data.failed) throw data
 
-      const fil = data.sort((a, b) => {
-        const timeA = a.order_ext_info?.ship_by_date ?? a.package_ext_info?.acl1_arrange_ship_date ?? 0
-        const timeB = b.order_ext_info?.ship_by_date ?? b.package_ext_info?.acl1_arrange_ship_date ?? 0
-
-        return timeB - timeA
-      })
+      const fil = data.sort((a, b) => b.order_ext_info.order_id - a.order_ext_info.order_id)
 
       setOrders(fil)
       setFilter(fil)
