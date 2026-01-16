@@ -139,6 +139,8 @@ export default function Dashboard() {
               ""
             )
 
+            console.log(msg);
+
             return (
               <div className="col-12 col-lg-3 d-flex flex-column p-1 text-light rounded gap-1 bg-light">
                 <div class={`alert ${cn} m-0 p-2`} role="alert">
