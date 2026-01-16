@@ -88,7 +88,7 @@ export default function Shopee() {
           if (form[id]) {
             const find = form[id].find((x) => x.location_name === location_name)
 
-            if (find) obj.sellable_stock = find.edit_stock || find.sellable_stock || 0
+            if (find) obj.sellable_stock = find.edit_stock !== undefined && find.edit_stock !== null ? find.edit_stock : find.sellable_stock || 0
 
             if (find && find.edit_stock < 0) status.err.push(`${variant_id} jumlah stock ${find.edit_stock} pcs tidak valid, harus diatas 0 pcs`)
             if (find && find.edit_stock !== sellable_stock) status.success.push(`${variant_id} dirubah dari ${sellable_stock} pcs menjadi ${find.edit_stock} pcs`)
