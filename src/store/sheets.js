@@ -10,7 +10,7 @@ export const getStock = createAsyncThunk("sheets/getStock", async (_, { getState
 
     const username = getState().auth.username.toUpperCase()
 
-    return data.filter((x) => (username === "app" ? true : x.brand === username)).sort((a, b) => a.artikel - b.artikel)
+    return data.filter((x) => x.brand === username).sort((a, b) => a.artikel - b.artikel)
   } catch (err) {
     return rejectWithValue(err.response?.data || "Gagal fetch stock")
   }
