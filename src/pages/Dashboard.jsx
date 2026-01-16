@@ -129,16 +129,6 @@ export default function Dashboard() {
 
             const cn = p.includes("INSTANT") ? "alert-danger" : ["HPAL", "HPAM", "HPSL", "HPC"].find((x) => json.includes(x)) ? "alert-info" : p.includes("DEPOK") ? "alert-warning" : "alert-success"
 
-            const msg = message ? (
-              <div className="alert p-2">
-                <div class="alert alert-light" role="alert">
-                  {message}
-                </div>
-              </div>
-            ) : (
-              ""
-            )
-
             console.log(order_sn, message)
 
             return (
@@ -156,7 +146,11 @@ export default function Dashboard() {
                     {package_ext_info.shipping_address.slice(0, 100)}
                   </p>
                 </div>
-                {msg}
+                <div className="alert p-2">
+                  <div class="alert alert-light" role="alert">
+                    {message}
+                  </div>
+                </div>
                 <div className="d-flex gap-1 p-0 h-100">{card}</div>
               </div>
             )
