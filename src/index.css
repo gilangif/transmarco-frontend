@@ -1,8 +1,7 @@
 html,
 body {
-  background-color: #000 !important;
-  color: white;
-  font-size: 0.8rem;
+  background: white;
+  font-size: 0.85rem;
 }
 
 tr,
@@ -141,4 +140,23 @@ td {
 
 .img-hover-wrapper:hover .img-overlay {
   opacity: 1;
+}
+
+
+.orders-img-profile {
+  width: 30px;
+  height: 30px;
+  border-radius: 100%;
+  aspect-ratio: 1/1;
+}
+
+.orders-img-product {
+  width: 55px;
+  height: 55px;
+  aspect-ratio: 1/1;
+}
+
+.orders-detail-product {
+  width: 55px;
+  height: 100%;
 }

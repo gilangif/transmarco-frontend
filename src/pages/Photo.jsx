@@ -1,7 +1,9 @@
+import { useDispatch, useSelector } from "react-redux"
 import { useEffect, useState } from "react"
-import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
 import { toast } from "react-toastify"
+
+import { setNavbarTitle } from "../store/config.js"
 
 import axios from "axios"
 import JSZip from "jszip"
@@ -12,6 +14,8 @@ export default function Photo() {
   const [value, setValue] = useState("")
   const [query, setQuery] = useState([])
   const [photos, setPhotos] = useState([])
+
+  const dispatch = useDispatch()
 
   const generatePhotos = async (e) => {
     try {
@@ -33,10 +37,13 @@ export default function Photo() {
 
       const { data } = await axios.post(host + "/tools/photo", { target })
 
-      const message = `Success generate ${data.length} media album with total ${data.flat().length} photo.`
+      const photos = data.flat()
+      const message = `Success generate ${data.length} media album with total ${photos.length} photo.`
 
       toast.success(message, { position: "top-right", autoClose: 1000, hideProgressBar: true, closeOnClick: false, pauseOnHover: false, draggable: true, progress: undefined, theme: "colored" })
+
       setPhotos(data)
+      dispatch(setNavbarTitle({ title: "Photo Generator", desc: `Showing ${data.length} media album with ${photos.length} photos` }))
     } catch (error) {
       const message = error.msg || error.user_message || error.message || "UNKNOWN ERROR"
       toast.error(message, { position: "top-right", autoClose: 1000, hideProgressBar: true, closeOnClick: false, pauseOnHover: false, draggable: true, progress: undefined, theme: "colored" })
@@ -112,100 +119,100 @@ export default function Photo() {
     }
   }
 
+  useEffect(() => {
+    dispatch(setNavbarTitle({ title: "Photo Generator", desc: "Search product or download product image from URL" }))
+  }, [])
+
   return (
     <>
-      <div className="container py-2">
+      <div className="p-2">
         <form onSubmit={(e) => generatePhotos(e)}>
-          <div className="d-flex flex-column justify-content-center align-items-center py-3">
-            <div className="alert alert-success" role="alert">
-              <h4 className="alert-heading">IMAGE DOWNLOADER</h4>
-              <p className="fw-bold">ZALORA, HUSH PUPPIES, AND 9TO9 WEBSITE SUPPORTED, THIS SITE CREATED AND DEVELOPED BY GILANG IF.</p>
+          <div className="d-flex flex-column justify-content-center align-items-center">
+            <div className="alert alert-success w-100" role="alert">
+              <h4 className="alert-heading mb-2">Image Downloader by Gilang IF</h4>
+
               {value && (
                 <>
                   <hr />
-                  <p className="mb-0">
+                  <p className="fw-bold mb-2">
                     Show {photos.flat().length} photo from {photos.length} result by search "{value}"
                   </p>
                 </>
               )}
 
               {photos.length > 1 && (
-                <div className="d-flex flex-column gap-2 py-1 my-3">
-                  <button type="button" className="btn btn-sm btn-danger w-100 p-3" onClick={() => downloadImageBulk(photos.flat())}>
+                <div className="d-flex flex-column gap-2 py-1">
+                  <button type="button" className="btn btn-sm btn-secondary w-100 p-2" onClick={() => downloadImageBulk(photos.flat())}>
                     SAVE ALL {photos.flat().length} PHOTO AS JPEG
                   </button>
-                  <button type="button" className="btn btn-sm btn-success w-100 p-3" onClick={() => downloadZip(photos, `BULK ${query.toUpperCase()} ${Date.now()}.zip`, true)}>
+                  <button type="button" className="btn btn-sm btn-success w-100 p-2" onClick={() => downloadZip(photos, `BULK ${query.toUpperCase()} ${Date.now()}.zip`, true)}>
                     SAVE ALL {photos.flat().length} PHOTO AS ZIP
                   </button>
                 </div>
               )}
             </div>
           </div>
-          <div className="py-3">
+
+          <div className="py-2 mb-3">
             <input type="text" className="form-control" value={value} onChange={(e) => setValue(e.target.value)} placeholder="Paste URL link or search something from zalora website" />
           </div>
 
           <div className="d-flex gap-3 justify-content-end">
-            <button type="button" className="btn btn-danger" onClick={() => setValue("")}>
+            <button type="button" className="btn btn-sm btn-secondary" onClick={() => setValue("")}>
               RESET
             </button>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-sm btn-success">
               SEARCH
             </button>
           </div>
         </form>
       </div>
 
-      <div className="py-3">
+      <div className="gap-3 d-flex flex-column mt-4">
         {photos.map((media, i) => {
           const title = `${media[0]?.title} ${media[0]?.variant}`
           const zipname = `BULK ${title} ${media[0]?.merchant} ${Date.now()}.zip`
 
           return (
-            <div className="container py-3" key={i}>
-              <div className="d-flex flex-column py-4 gap-2">
-                <h1>
-                  <Link className="text-light" to={media[0]?.source} target="_blank">
-                    {title}
+            <div className="p-2" key={i}>
+              <div className="d-flex gap-1 bg-dark rounded p-0 mb-2">
+                <div className="col p-2">
+                  <Link className="text-decoration-none fw-bold" to={media[0]?.source} target="_blank">
+                    <h6 className="text-light fw-bold mt-2 px-1">{title}</h6>
                   </Link>
-                </h1>
-                <div className="d-flex gap-3">
-                  <button type="button" className="btn btn-sm btn-danger px-3" onClick={() => downloadImageBulk(media)}>
+                </div>
+                <div className="d-flex gap-3 p-2">
+                  <button type="button" className="btn btn-sm text-light fw-bold" onClick={() => downloadImageBulk(media)}>
                     JPEG
                   </button>
-                  <button type="button" className="btn btn-sm btn-success px-3" onClick={() => downloadZip(media, zipname, false)}>
+                  <button type="button" className="btn btn-sm text-light fw-bold" onClick={() => downloadZip(media, zipname, false)}>
                     ZIP
                   </button>
                 </div>
               </div>
-              <div className="row p-1 m-0 bg-light rounded" key={i}>
-                {media.map((photo, idx) => (
-                  <div className="col-6 col-lg-3 p-1 rounded" key={idx}>
-                    <div className="card h-100 nocursor border border-1">
-                      <div className="img-hover-wrapper">
+
+              <div className="row p-0 m-0 bg-light text-dark" key={i}>
+                {media.map((photo, idx) => {
+                  const name = `${photo.title} ${photo.variant} ${i + 1}`
+
+                  return (
+                    <div className="col-4 col-lg-3 p-1 rounded" key={idx}>
+                      <div className="card h-100 nocursor border border-1">
                         <img src={photo.url} className="card-img-top" alt={photo.file} />
 
-                        <div className="img-overlay nocursor">
-                          <p>ESTIMATE TIME</p>
-                          <p>{photo.file}</p>
-                          <p>{photo.merchant}</p>
+                        <div className="card-body p-2 text-center">
+                          <span className="card-title fw-bold my-1">{name.trim()}</span>
+                        </div>
+
+                        <div className="p-1">
+                          <a className="btn btn-dark btn-sm fw-bold w-100" type="button" onClick={() => downloadImage(photo.url, photo.file)}>
+                            DOWNLOAD
+                          </a>
                         </div>
                       </div>
-
-                      <div className="card-body p-2 text-center">
-                        <h6 className="card-title fw-bold my-1">
-                          {photo.title} {photo.variant} {i + 1}
-                        </h6>
-                      </div>
-
-                      <div className="p-1">
-                        <a className="btn btn-success btn-sm fw-bold w-100" type="button" onClick={() => downloadImage(photo.url, photo.file)}>
-                          DOWNLOAD
-                        </a>
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )

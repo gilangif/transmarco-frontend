@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import timestamp from "../../utils/timestamp.js"
 
 function secondsToHHMMSS(seconds) {
   const h = Math.floor(seconds / 3600)
@@ -9,7 +8,7 @@ function secondsToHHMMSS(seconds) {
   return [h, m, s].map((v) => String(v).padStart(2, "0")).join(":")
 }
 
-export default function ProductBoostCard({ image, id, boost_id, cool_down_seconds, date, name, detail, estimate }) {
+export default function BoostCard({ image, id, boost_id, cool_down_seconds, date, name, detail, estimate }) {
   const [counter, setCounter] = useState(cool_down_seconds || 0)
   const [show, setShow] = useState(true)
 
