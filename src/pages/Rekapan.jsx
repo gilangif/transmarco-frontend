@@ -266,7 +266,9 @@ export default function Rekapan() {
               <th className="text-center">#</th>
               <th className="text-start">Brand</th>
               <th className="text-end">Ofline</th>
+              <th className="text-end">Qty</th>
               <th className="text-end">Online</th>
+              <th className="text-end">Qty</th>
               <th className="text-end">Total</th>
               <th className="text-end">Qty</th>
             </tr>
@@ -294,8 +296,10 @@ export default function Rekapan() {
                   <td className={`text-start ${transmarco ? "fw-bold" : ""}`} onClick={() => window.open(`/sales?brand=${brand}`)}>
                     {brand}
                   </td>
-                  <td className="text-end text-success">{currrency(online)} ({online_qty} PCS)</td>
-                  <td className="text-end text-primary">{currrency(offline)} ({offline_qty} PCS)</td>
+                  <td className="text-end text-success">{offline_qty ? currrency(offline) : "-"}</td>
+                  <td className="text-end text-success">{offline_qty ? offline_qty : "-"}</td>
+                  <td className="text-end text-primary">{online_qty ? currrency(online) : "-"}</td>
+                  <td className="text-end text-primary">{online_qty ? online_qty : "-"}</td>
                   <td className="text-end text-dark">{currrency(netto)}</td>
                   <td className="text-end text-dark fw-bold">{qty}</td>
                 </tr>
