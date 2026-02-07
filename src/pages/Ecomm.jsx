@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { toast } from "react-toastify"
 
 import { login, logout } from "../store/auth.js"
+import { setNavbarTitle } from "../store/config.js"
 
 import axios from "axios"
 
@@ -41,6 +42,8 @@ export default function Ecomm() {
   const [edit, setEdit] = useState(false)
 
   const isSelect = useRef(false)
+
+  const dispatch = useDispatch()
 
   const DEFAULT_IMAGE = "https://www.freeiconspng.com/uploads/pepe-clip-art-9.png"
 
@@ -169,6 +172,8 @@ export default function Ecomm() {
 
   useEffect(() => {
     document.title = "SHEETS E-COMMERCE"
+
+    dispatch(setNavbarTitle({ title: "Sheets E-Commerce", desc: `search shopee order` }))
   }, [])
 
   if (!orders.order_items || orders.order_items.length < 1) {

@@ -59,7 +59,13 @@ export default function Layout() {
           <NavItem onClick={() => (isMobile ? setOpen(false) : setOpen(true))} to="/shopee/boosts" label="SHOPEE BOOSTS" />
           <NavItem onClick={() => (isMobile ? setOpen(false) : setOpen(true))} to="/shopee/ecomm" label="SHOPEE ORDERS" />
 
-          <li className="nav-item fw-bold mt-3" onClick={() => dispatch(logout())}>
+          <li
+            className="nav-item fw-bold mt-3"
+            onClick={() => {
+              isMobile ? setOpen(false) : setOpen(true)
+              dispatch(logout())
+            }}
+          >
             <span className="nav-link text-light fw-bold">LOGOUT</span>
           </li>
 

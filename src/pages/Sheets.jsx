@@ -6,17 +6,14 @@ import { Sheet } from "react-modal-sheet"
 import { toast } from "react-toastify"
 
 import { login, logout } from "../store/auth.js"
+import { setNavbarTitle } from "../store/config.js"
 
 import currrency from "../utils/currency.js"
 
 export default function Sheets() {
   const { stocks, fields, type, loading, error } = useSelector((s) => s.sheets)
-  const { username } = useSelector((s) => s.auth)
 
-  const [isOpen, setOpen] = useState(false)
   const [filter, setFilter] = useState([])
-
-  const [target, setTarget] = useState({})
   const [search, setSearch] = useState("")
 
   const navigate = useNavigate()
@@ -49,6 +46,8 @@ export default function Sheets() {
 
   useEffect(() => {
     document.title = "STOCK PANJANG"
+
+    dispatch(setNavbarTitle({ title: "Google Sheets", desc: `Stock Panjang Sheets` }))
 
     stockHandler()
   }, [dispatch])
@@ -111,7 +110,9 @@ export default function Sheets() {
                 <tr key={i}>
                   <td className="text-center">{i + 1}</td>
                   <td className="text-start">{item.brand}</td>
-                  <td className={`text-start ${item.shopee_id ? "" : "text-secondary"}`} onClick={() => navigate(item.shopee_id ? `/shopee?id=${item.shopee_id}` : "#")}>{item.barcode}</td>
+                  <td className={`text-start ${item.shopee_id ? "" : "text-secondary"}`} onClick={() => navigate(item.shopee_id ? `/shopee?id=${item.shopee_id}` : "#")}>
+                    {item.barcode}
+                  </td>
                   <td className="text-start">{item.desc}</td>
                   <td className="text-start">{currrency(item.price)}</td>
                   <td className="text-start">{item.promo}</td>

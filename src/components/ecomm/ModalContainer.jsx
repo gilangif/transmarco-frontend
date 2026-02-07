@@ -26,14 +26,12 @@ export default function ModalContainer() {
   const { order_sn, product_name, variant_name, item_id, model_id, sku_variant, order_price, amount, status_info, shipping, artikel, brand, desc, stock, price, netto, promo, size } = modalForm
 
   const [results, setResults] = useState([])
-  const [sheets, setSheets] = useState([])
 
   const [status, setStatus] = useState("")
   const [note, setNote] = useState("")
   const [qty, setQty] = useState("1")
 
   const isSelect = useRef(true)
-
   const dispatch = useDispatch()
 
   const searchItem = async () => {
@@ -134,6 +132,10 @@ export default function ModalContainer() {
       })
     }
   }
+
+  useEffect(() => {
+    setQty(amount)
+  }, [modalForm])
 
   useEffect(() => {
     if (!barcode) return

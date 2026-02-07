@@ -2,6 +2,7 @@ import { useSelector, useDispatch } from "react-redux"
 import { useEffect, useState } from "react"
 
 import { setCSV } from "../store/rekapan.js"
+import { setNavbarTitle } from "../store/config.js"
 
 import currrency from "../utils/currency.js"
 import generateRekapan from "../utils/generateRekapan.js"
@@ -209,6 +210,11 @@ export default function Rekapan() {
 
     setFilter(arr)
   }, [range])
+
+  useEffect(() => {
+    document.title = "REKAPAN"
+    dispatch(setNavbarTitle({ title: "REKAPAN", desc: `citrus rekapan` }))
+  }, [])
 
   return (
     <div className="p-0">
