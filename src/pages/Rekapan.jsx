@@ -265,6 +265,8 @@ export default function Rekapan() {
             <tr>
               <th className="text-center">#</th>
               <th className="text-start">Brand</th>
+              <th className="text-end">Ofline</th>
+              <th className="text-end">Online</th>
               <th className="text-end">Total</th>
               <th className="text-end">Qty</th>
             </tr>
@@ -273,7 +275,15 @@ export default function Rekapan() {
             {brands.map((brand, i) => {
               const arr = filter.filter((x) => x.brand === brand)
 
-              const real_netto = arr.map((x) => x.netto + x.disc_3).reduce((a, b) => a + b, 0)
+              const on = arr.filter((x) => x.type === "ECM")
+              const online = on.map((x) => x.netto + x.disc_3).reduce((a, b) => a + b, 0)
+              const online_qty = on.map((x) => x.qty).reduce((a, b) => a + b, 0)
+
+              const off = arr.filter((x) => x.type !== "ECM")
+              const offline = off.map((x) => x.netto + x.disc_3).reduce((a, b) => a + b, 0)
+              const offline_qty = off.map((x) => x.qty).reduce((a, b) => a + b, 0)
+
+              const netto = arr.map((x) => x.netto + x.disc_3).reduce((a, b) => a + b, 0)
               const qty = arr.map((x) => x.qty).reduce((a, b) => a + b, 0)
 
               const transmarco = ["HUSH PUPPIES", "OBERMAIN", "PLAYBOY", "CATTERPILAR"].find((x) => brand.includes(x))
@@ -284,7 +294,9 @@ export default function Rekapan() {
                   <td className={`text-start ${transmarco ? "fw-bold" : ""}`} onClick={() => window.open(`/sales?brand=${brand}`)}>
                     {brand}
                   </td>
-                  <td className="text-end text-dark">{currrency(real_netto)}</td>
+                  <td className="text-end text-success">{currrency(online)} ({online_qty} PCS)</td>
+                  <td className="text-end text-primary">{currrency(offline)} ({offline_qty} PCS)</td>
+                  <td className="text-end text-dark">{currrency(netto)}</td>
                   <td className="text-end text-dark fw-bold">{qty}</td>
                 </tr>
               )
