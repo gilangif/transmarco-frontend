@@ -4,22 +4,8 @@ body {
   font-size: 0.85rem;
 }
 
-tr,
-th {
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  -webkit-touch-callout: none;
-}
-
 td {
   padding: 0.5rem 0.45rem !important;
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  -webkit-touch-callout: none;
 }
 
 

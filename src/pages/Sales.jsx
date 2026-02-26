@@ -50,10 +50,8 @@ export default function Shopee() {
       .filter((x) => x.day >= range.start && x.day <= range.end)
       .sort((a, b) => a.bon - b.bon)
 
-    const total = data.filter((x) => x.brand === brand).sort((a, b) => a.bon - b.bon)
-
-    const total_netto = total.map((x) => x.netto + x.disc_3).reduce((a, b) => a + b, 0)
-    const total_qty = total.map((x) => x.qty).reduce((a, b) => a + b, 0)
+    const total_netto = rekapan.map((x) => x.netto + x.disc_3).reduce((a, b) => a + b, 0)
+    const total_qty = rekapan.map((x) => x.qty).reduce((a, b) => a + b, 0)
 
     const online = rekapan.filter((x) => x.type === "ECM")
     const offline = rekapan.filter((x) => x.type !== "ECM")
