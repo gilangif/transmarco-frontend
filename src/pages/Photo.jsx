@@ -11,46 +11,97 @@ import JSZip from "jszip"
 export default function Photo() {
   const { host } = useSelector((s) => s.config)
 
-  const [value, setValue] = useState("")
-  const [query, setQuery] = useState([])
-  const [photos, setPhotos] = useState([])
+  const [search, setSearch] = useState("")
+  const [merchant, setMerchant] = useState("lazada")
+
+  const [results, setResults] = useState([])
+  const [detail, setDetail] = useState({})
 
   const dispatch = useDispatch()
 
-  const generatePhotos = async (e) => {
+  const DEFAULT_IMAGE = "https://usagif.com/wp-content/uploads/2021/4fh5wi/pepefrg-8.gif"
+
+  const generatePhotos = async (url, type) => {
+    const toastId = toast.loading("Searching data...")
+
     try {
-      e.preventDefault()
+      const { data } = await axios.post(host + "/photo/generator", { url, type })
 
-      let target = value.trim()
+      toast.update(toastId, { render: `Success generate ${data.length} results`, type: "success", isLoading: false, autoClose: 1500, theme: "colored" })
 
-      if (!target) return
-
-      const arr = ["HUSHPUPPIES", "9TO9", "ZALORA"]
-      const find = arr.find((x) => target.toUpperCase().includes(x))
-
-      if (!find) target = "https://www.zalora.co.id/search?q=" + target.replace(/\s+/g, "+")
-
-      const url = new URL(target)
-      const query = url.searchParams.get("q")
-
-      if (query) setQuery(query)
-
-      const { data } = await axios.post(host + "/tools/photo", { target })
-
-      const photos = data.flat()
-      const message = `Success generate ${data.length} media album with total ${photos.length} photo.`
-
-      toast.success(message, { position: "top-right", autoClose: 1000, hideProgressBar: true, closeOnClick: false, pauseOnHover: false, draggable: true, progress: undefined, theme: "colored" })
-
-      setPhotos(data)
-      dispatch(setNavbarTitle({ title: "Photo Generator", desc: `Showing ${data.length} media album with ${photos.length} photos` }))
+      setResults(data)
+      dispatch(setNavbarTitle({ title: "Photo Generator", desc: `Showing ${data.length} media album` }))
     } catch (error) {
       const message = error.msg || error.user_message || error.message || "UNKNOWN ERROR"
-      toast.error(message, { position: "top-right", autoClose: 1000, hideProgressBar: true, closeOnClick: false, pauseOnHover: false, draggable: true, progress: undefined, theme: "colored" })
+
+      toast.update(toastId, { render: message, type: "error", isLoading: false, autoClose: 3000, theme: "colored" })
     }
   }
 
-  const downloadImage = async (url, filename) => {
+  const handleZIP = async (thumbs, name) => {
+    try {
+      const zip = new JSZip()
+
+      for (const thumb of thumbs) {
+        const { file_url, file_name } = thumb
+
+        const res = await fetch(file_url)
+        const blob = await res.blob()
+
+        zip.file(file_name, blob)
+      }
+
+      const zipName = `${name ? `${name} ${Date.now()}` : Date.now()}.zip`
+      const zipBlob = await zip.generateAsync({ type: "blob" })
+
+      const link = document.createElement("a")
+
+      link.href = URL.createObjectURL(zipBlob)
+      link.download = zipName
+      link.click()
+
+      URL.revokeObjectURL(link.href)
+    } catch (err) {
+      toast.error("Failed generate ZIP file")
+    }
+  }
+
+  const handleBulkZIP = async (lists, name) => {
+    try {
+      const zip = new JSZip()
+
+      for (const list of lists) {
+        const { title, variant, thumbs } = list
+
+        for (const thumb of thumbs) {
+          const { file_url, file_name } = thumb
+
+          const res = await fetch(file_url)
+          const blob = await res.blob()
+
+          const folderPath = `${title} ${variant}`
+          const folder = zip.folder(folderPath)
+
+          folder.file(file_name, blob)
+        }
+      }
+
+      const zipName = `${name ? `${name} ${Date.now()}` : Date.now()} BULK.zip`
+      const zipBlob = await zip.generateAsync({ type: "blob" })
+
+      const link = document.createElement("a")
+
+      link.href = URL.createObjectURL(zipBlob)
+      link.download = zipName
+      link.click()
+
+      URL.revokeObjectURL(link.href)
+    } catch (err) {
+      toast.error("Failed generate ZIP file")
+    }
+  }
+
+  const handleDownload = async (url, filename) => {
     try {
       const res = await fetch(url)
       const blob = await res.blob()
@@ -61,7 +112,6 @@ export default function Photo() {
       link.download = filename.replace(".jpg", `_${Date.now()}.jpeg`)
 
       document.body.appendChild(link)
-
       link.click()
 
       URL.revokeObjectURL(link.href)
@@ -71,152 +121,186 @@ export default function Photo() {
     }
   }
 
-  const downloadImageBulk = async (media) => {
-    for (const { url, file } of media) {
-      await downloadImage(url, file)
+  const handleBulkDownload = async (thumbs) => {
+    for (const thumb of thumbs) {
+      const { file_url, file_name } = thumb
+
+      await handleDownload(file_url, file_name)
       await new Promise((r) => setTimeout(r, 500))
     }
   }
 
-  const downloadZip = async (files, zipName = "images.zip", bulk) => {
-    try {
-      const zip = new JSZip()
+  const handleSubmit = (e) => {
+    e.preventDefault()
 
-      if (bulk) {
-        for (const x of files) {
-          for (const y of x) {
-            const { title, variant, url, desc, file } = y
+    const regex = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i
 
-            const res = await fetch(url)
-            const blob = await res.blob()
+    let url = search
+    let type = "auto"
 
-            const folderPath = `${title} ${variant}`
-            const folder = zip.folder(folderPath)
+    if (regex.test(search)) {
+      const { host } = new URL(search)
 
-            folder.file(file, blob)
-          }
-        }
-      } else {
-        for (const file of files) {
-          const res = await fetch(file.url)
-          const blob = await res.blob()
+      if (host === "9to9.co.id") type = "9to9"
+      if (host === "www.zalora.co.id") type = "zalora"
+      if (host === "hana-collections.com") type = "hana"
+      if (host === "hushpuppies.co.id") type = "hush_puppies"
 
-          zip.file(file.file, blob)
-        }
-      }
-
-      const zipBlob = await zip.generateAsync({ type: "blob" })
-      const link = document.createElement("a")
-
-      link.href = URL.createObjectURL(zipBlob)
-      link.download = zipName
-      link.click()
-
-      URL.revokeObjectURL(link.href)
-    } catch (err) {
-      console.error(err)
-      alert("Gagal membuat ZIP")
+      return generatePhotos(url, type)
     }
+
+    if (merchant === "lazada") url = "https://www.zalora.co.id/search?q=" + search
+    if (merchant === "9to9") url = "https://9to9.co.id/search?q=" + search
+    if (merchant === "hana") url = "https://hana-collections.com/?s=" + search
+    if (merchant === "hush_puppies") url = "https://hushpuppies.co.id/search?q=" + search
+
+    return generatePhotos(url, "auto")
   }
 
   useEffect(() => {
+    document.title = "Photo Generator"
+
     dispatch(setNavbarTitle({ title: "Photo Generator", desc: "Search product or download product image from URL" }))
   }, [])
 
   return (
     <>
-      <div className="p-2">
-        <form onSubmit={(e) => generatePhotos(e)}>
-          <div className="d-flex flex-column justify-content-center align-items-center">
-            <div className="alert alert-success w-100" role="alert">
-              <h4 className="alert-heading mb-2">Image Downloader by Gilang IF</h4>
-
-              {value && (
-                <>
-                  <hr />
-                  <p className="fw-bold mb-2">
-                    Show {photos.flat().length} photo from {photos.length} result by search "{value}"
-                  </p>
-                </>
-              )}
-
-              {photos.length > 1 && (
-                <div className="d-flex flex-column gap-2 py-1">
-                  <button type="button" className="btn btn-sm btn-secondary w-100 p-2" onClick={() => downloadImageBulk(photos.flat())}>
-                    SAVE ALL {photos.flat().length} PHOTO AS JPEG
-                  </button>
-                  <button type="button" className="btn btn-sm btn-success w-100 p-2" onClick={() => downloadZip(photos, `BULK ${query.toUpperCase()} ${Date.now()}.zip`, true)}>
-                    SAVE ALL {photos.flat().length} PHOTO AS ZIP
-                  </button>
-                </div>
-              )}
+      <div class="modal fade" id="modal-detail" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5">
+                {detail.brand} {detail.title} {detail.variant}
+              </h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <ul class="list-group mb-3">
+                <li class="list-group-item active" aria-current="true">
+                  {detail.sku}
+                </li>
+                <li class="list-group-item">RP. {detail.price}</li>
+                <li class="list-group-item">Rp. {detail.netto}</li>
+              </ul>
+              <textarea className="form-control" value={detail.description} style={{ height: "50vh" }} />
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
+                Close
+              </button>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div className="py-2 mb-3">
-            <input type="text" className="form-control" value={value} onChange={(e) => setValue(e.target.value)} placeholder="Paste URL link or search something from zalora website" />
-          </div>
+      <div className="p-3">
+        <form onSubmit={(e) => handleSubmit(e)}>
+          <div className="d-flex gap-3 input-group input-group-sm py-2 mb-4">
+            <input type="text" className="form-control" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Paste URL link or search something.." />
 
-          <div className="d-flex gap-3 justify-content-end">
-            <button type="button" className="btn btn-sm btn-secondary" onClick={() => setValue("")}>
+            <button type="button" className="btn btn-sm rounded btn-secondary" onClick={() => setSearch("")}>
               RESET
             </button>
-            <button type="submit" className="btn btn-sm btn-success">
+            <button type="submit" className="btn btn-sm rounded btn-success">
               SEARCH
             </button>
           </div>
+
+          <div className="d-flex gap-3">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" value="lazada" checked={"lazada" === merchant} onChange={(e) => setMerchant(e.target.value)} />
+              <label class="form-check-label">Lazada</label>
+            </div>
+
+            <div class="form-check">
+              <input class="form-check-input" type="radio" value="9to9" checked={"9to9" === merchant} onChange={(e) => setMerchant(e.target.value)} />
+              <label class="form-check-label">9to9</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" value="hush_puppies" checked={"hush_puppies" === merchant} onChange={(e) => setMerchant(e.target.value)} />
+              <label class="form-check-label">Hush Puppies</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" value="hana" checked={"hana" === merchant} onChange={(e) => setMerchant(e.target.value)} />
+              <label class="form-check-label">Hana Bags</label>
+            </div>
+          </div>
         </form>
-      </div>
 
-      <div className="gap-3 d-flex flex-column mt-4">
-        {photos.map((media, i) => {
-          const title = `${media[0]?.title} ${media[0]?.variant}`
-          const zipname = `BULK ${title} ${media[0]?.merchant} ${Date.now()}.zip`
+        {results.length > 1 && (
+          <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center p-2 bg-danger py-3 my-3 text-light rounded">
+            <div className="px-2">
+              <span className="fw-bold">SAVE ALL {results.length} RESULTS</span>
+            </div>
 
-          return (
-            <div className="p-2" key={i}>
-              <div className="d-flex gap-1 bg-dark rounded p-0 mb-2">
-                <div className="col p-2">
-                  <Link className="text-decoration-none fw-bold" to={media[0]?.source} target="_blank">
-                    <h6 className="text-light fw-bold mt-2 px-1">{title}</h6>
-                  </Link>
+            <div className="d-flex gap-4 px-2 mt-2 mt-md-0">
+              <span className="fw-bold" type="button" onClick={() => handleBulkDownload(thumbs)}>
+                JPEG ALL
+              </span>
+              <span className="fw-bold" type="button" onClick={() => handleZIP(results.map(({ thumbs }) => thumbs).flat(), `${results[0].title} LAZADA`, false)}>
+                ZIP ALL
+              </span>
+              <span className="fw-bold" type="button" onClick={() => handleBulkZIP(results, `${results[0].title}`, false)}>
+                ZIP DIR
+              </span>
+            </div>
+          </div>
+        )}
+
+        <div className="d-flex flex-column mt-4">
+          {results.map((x, i) => {
+            const { url, type, brand, sku, title, variant, description, price, netto, thumbs } = x
+
+            return (
+              <div className="">
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center p-2 bg-dark text-light rounded">
+                  <div className="px-2">
+                    <a href={url} className="text-light text-decoration-none">
+                      <span className="fw-bold">
+                        {brand} {title} {variant}
+                      </span>
+                    </a>
+                  </div>
+
+                  <div className="d-flex gap-4 px-2 mt-2 mt-md-0">
+                    <span className="fw-bold" type="button" onClick={() => handleBulkDownload(thumbs)}>
+                      JPEG
+                    </span>
+                    <span className="fw-bold" type="button" onClick={() => handleZIP(thumbs, `${title} ${variant}`, false)}>
+                      ZIP
+                    </span>
+                    <span className="fw-bold" role="button" data-bs-toggle="modal" data-bs-target="#modal-detail" onClick={() => setDetail(x)}>
+                      DETAIL
+                    </span>
+                  </div>
                 </div>
-                <div className="d-flex gap-3 p-2">
-                  <button type="button" className="btn btn-sm text-light fw-bold" onClick={() => downloadImageBulk(media)}>
-                    JPEG
-                  </button>
-                  <button type="button" className="btn btn-sm text-light fw-bold" onClick={() => downloadZip(media, zipname, false)}>
-                    ZIP
-                  </button>
-                </div>
-              </div>
 
-              <div className="row p-0 m-0 bg-light text-dark" key={i}>
-                {media.map((photo, idx) => {
-                  const name = `${photo.title} ${photo.variant} ${i + 1}`
+                <div className="row g-1 py-3">
+                  {thumbs.map((y, i) => {
+                    const { file_url, file_name } = y
 
-                  return (
-                    <div className="col-4 col-lg-3 p-1 rounded" key={idx}>
-                      <div className="card h-100 nocursor border border-1">
-                        <img src={photo.url} className="card-img-top" alt={photo.file} />
-
-                        <div className="card-body p-2 text-center">
-                          <span className="card-title fw-bold my-1">{name.trim()}</span>
-                        </div>
-
-                        <div className="p-1">
-                          <a className="btn btn-dark btn-sm fw-bold w-100" type="button" onClick={() => downloadImage(photo.url, photo.file)}>
+                    return (
+                      <div className="col-3 col-lg-2 p-1">
+                        <img src={file_url || DEFAULT_IMAGE} class="photo-card-img card-img-top rounded border border-1 mb-2" onError={(e) => (e.currentTarget.src = DEFAULT_IMAGE)} />
+                        <div class="text-center">
+                          <p class="m-0 p-0 ">
+                            {title} {variant} {i + 1}
+                          </p>
+                          <a href={file_url} target="_blank" class="mt-2 w-100 btn btn-sm btn-secondary">
+                            PREVIEW
+                          </a>
+                          <a class="mt-2 w-100 btn btn-sm btn-dark" onClick={() => handleDownload(file_url, file_name)}>
                             DOWNLOAD
                           </a>
                         </div>
                       </div>
-                    </div>
-                  )
-                })}
+                    )
+                  })}
+                </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
     </>
   )

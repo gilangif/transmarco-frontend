@@ -9,12 +9,10 @@ td {
 }
 
 
-
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -145,4 +143,10 @@ td {
 .orders-detail-product {
   width: 55px;
   height: 100%;
+}
+
+
+.photo-card-img {
+  aspect-ratio: 1/1.4;
+  object-fit: cover;
 }
