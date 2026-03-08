@@ -60,7 +60,7 @@ const kompetitor = [
   { brand: "PAKALOLO", alias: "PAKALOLO", division: "MEN'S SHOES", counter: "3510", de: "20123", transmarco: false },
   { brand: "BRUNO PREMI", alias: "BRUNO PREMI", division: "MEN'S SHOES", counter: "3563", de: "20179", transmarco: false },
   { brand: "JIM JOKER", alias: "JIM JOKER", division: "MEN'S SHOES", counter: "3565", de: "", transmarco: false },
-  { brand: "HUSH PUPPIES MENS SHOES", alias: "HUSH PUPPIES", division: "MEN'S SHOES", counter: "3503", de: "2076", transmarco: false },
+  { brand: "HUSH PUPPIES MENS SHOES", alias: "HUSH PUPPIES", division: "MEN'S SHOES", counter: "3503", de: "2076", transmarco: true },
   { brand: "GINO MARIANI", alias: "GINO MARIANI", division: "MEN'S SHOES", counter: "3550", de: "", transmarco: false },
   { brand: "ROHDE ST BARBARA MENS", alias: "ROHDE", division: "MEN'S SHOES", counter: "3518", de: "20138", transmarco: false },
   { brand: "PIERRE CARDIN MENS", alias: "PIERRE CARDIN", division: "MEN'S SHOES", counter: "3517", de: "20128", transmarco: false },
@@ -73,6 +73,7 @@ const kompetitor = [
   { brand: "EVB BAG LADIES", alias: "EVB", division: "BAG LADIES", counter: "4535", de: "20205", transmarco: false },
   { brand: "HANA HANDBAG", alias: "HANA", division: "BAG LADIES", counter: "4531", de: "", transmarco: false },
   { brand: "ELLE BAGS", alias: "ELLE", division: "BAG LADIES", counter: "4528", de: "2053", transmarco: false },
+  { brand: "CARRIE KOLLER", alias: "CARRIE KOLLER", division: "BAG LADIES", counter: "4537", de: "20207", transmarco: false },
   { brand: "PIERRE CARDIN LADIES BAG", alias: "PIERRE CARDIN", division: "BAG LADIES", counter: "4533", de: "20202", transmarco: false },
   { brand: "TRACCE BAG LADIES", alias: "TRACCE", division: "BAG LADIES", counter: "4536", de: "", transmarco: false },
   { brand: "BRUNO PREMI LADIES BAG", alias: "BRUNO PREMI", division: "BAG LADIES", counter: "4532", de: "20187", transmarco: false },
@@ -288,7 +289,7 @@ export default function Rekapan() {
               const netto = arr.map((x) => x.netto + x.disc_3).reduce((a, b) => a + b, 0)
               const qty = arr.map((x) => x.qty).reduce((a, b) => a + b, 0)
 
-              const transmarco = ["HUSH PUPPIES", "OBERMAIN", "PLAYBOY", "CATTERPILAR"].find((x) => brand.includes(x))
+              const transmarco = ["HUSH PUPPIES", "OBERMAIN", "PLAYBOY", "CATERPILAR"].find((x) => brand.includes(x))
 
               return (
                 <tr key={i}>
