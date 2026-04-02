@@ -4,6 +4,7 @@ const initialState = {
   barcode: "",
   modalForm: {
     order_sn: "",
+    shipping_trace_number: "",
     product_name: "",
     variant_name: "",
     sku_parent: "",

@@ -23,7 +23,27 @@ export default function ModalContainer() {
   const { host } = useSelector((s) => s.config)
   const { barcode, modalForm } = useSelector((s) => s.ecomm)
 
-  const { order_sn, product_name, variant_name, item_id, model_id, sku_variant, order_price, amount, status_info, shipping, artikel, brand, desc, stock, price, netto, promo, size } = modalForm
+  const {
+    order_sn,
+    shipping_trace_number,
+    product_name,
+    variant_name,
+    item_id,
+    model_id,
+    sku_variant,
+    order_price,
+    amount,
+    status_info,
+    shipping,
+    artikel,
+    brand,
+    desc,
+    stock,
+    price,
+    netto,
+    promo,
+    size,
+  } = modalForm
 
   const [results, setResults] = useState([])
 
@@ -76,7 +96,7 @@ export default function ModalContainer() {
 
   const addForm = async () => {
     try {
-      const obj = { order_sn, barcode, qty, sku_variant, product_name, variant_name, order_price, status_info, item_id, model_id, shipping, status, note }
+      const obj = { order_sn, shipping_trace_number, barcode, qty, sku_variant, product_name, variant_name, order_price, status_info, item_id, model_id, shipping, status, note }
 
       const { data } = await axios.post(host + "/sheets/ecomm/add", obj, { headers: { Authorization: `Bearer ${accessToken}` } })
       const { success, message } = data || {}
@@ -155,7 +175,7 @@ export default function ModalContainer() {
         <div className="modal-content">
           <div className="modal-header">
             <h1 className="modal-title fs-5" id="modal-update">
-              {order_sn}
+              {shipping_trace_number}
             </h1>
             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -206,6 +226,11 @@ export default function ModalContainer() {
             </div>
 
             <div className="my-2">
+              <div className="form-group col mb-1 input-group-sm">
+                <label className="col-form-label px-1">Order SN</label>
+                <input type="text" className="form-control text-danger fw-bold" placeholder="Description" value={order_sn} disabled />
+              </div>
+
               <div className="form-group col mb-1 input-group-sm">
                 <label className="col-form-label px-1">Description</label>
                 <input type="text" className="form-control text-success fw-bold" placeholder="Description" value={desc} disabled />

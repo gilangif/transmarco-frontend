@@ -28,6 +28,7 @@ export default function Ecomm() {
   const [results, setResults] = useState([])
 
   const [keyword, setKeyword] = useState("")
+  const [orderSN, setOrderSN] = useState("")
   const [shipping, setShipping] = useState("")
   const [username, setUsername] = useState("")
   const [userID, setUserID] = useState("")
@@ -52,11 +53,12 @@ export default function Ecomm() {
   }
 
   const handleSelect = async (order) => {
-    const { order_id, order_sn, model_image, buyer_name, buyer_image, src } = order
+    const { order_id, order_sn, shipping_trace_number, model_image, buyer_name, buyer_image, src } = order
 
     isSelect.current = true
 
-    setKeyword(order_sn)
+    setKeyword(shipping_trace_number)
+    setOrderSN(order_sn)
     setResults([])
 
     const detail = await getOrderDetail(order_id)
@@ -64,7 +66,7 @@ export default function Ecomm() {
     const { shipping_address, status_info_v2, create_time, complete_time, shipping_confirm_time, seller_address, fulfillment_carrier_name, order_items, buyer_user } = detail
     const { user_name, user_id } = buyer_user || {}
 
-    setOrders(detail)
+    setOrders({ ...detail, shipping_trace_number })
     setItems(order_items)
 
     if (user_id) setUserID(user_id)
@@ -121,9 +123,9 @@ export default function Ecomm() {
     try {
       if (!keyword) return
 
-      const { data } = await axios.post(host + "/shopee/order/search", { keyword, type: "no_pesanan" }, { headers: { Authorization: `Bearer ${accessToken}` } })
-      const { order_sn_result } = data || {}
-      const { total = 0, list = [] } = order_sn_result || {}
+      const { data } = await axios.post(host + "/shopee/order/search", { keyword, type: "no_resi" }, { headers: { Authorization: `Bearer ${accessToken}` } })
+      const { shipping_trace_numbers_result, order_sn_result } = data || {}
+      const { total = 0, list = [] } = shipping_trace_numbers_result || {}
 
       if (list.length === 0) {
         setSearchMessage(`Orders with keyword "${keyword}" not found`)
@@ -195,7 +197,7 @@ export default function Ecomm() {
 
             <div className="d-flex flex-column gap-2 py-1">
               {results.map((order, i) => {
-                const { order_id, order_sn, model_image, buyer_user_id, buyer_name, buyer_image, src } = order
+                const { order_id, order_sn, shipping_trace_number, model_image, buyer_user_id, buyer_name, buyer_image, src } = order
 
                 return (
                   <div key={i} className="d-flex flex-row align-items-center bg-dark rounded shadow" onClick={() => handleSelect({ ...order, src })} style={{ cursor: "pointer" }}>
@@ -203,8 +205,8 @@ export default function Ecomm() {
                       <img src={src} alt={src} width="40" height="40" className="rounded object-fit-cover p-0" />
                     </div>
                     <div className="col p-2">
-                      <p className="fw-bold m-0 text-light">{order_sn}</p>
-                      <p className="fw-bold m-0 text-secondary">{buyer_name}</p>
+                      <p className="fw-bold m-0 text-light">{shipping_trace_number}</p>
+                      <p className="fw-bold m-0 text-secondary">{order_sn}</p>
                     </div>
                   </div>
                 )
@@ -244,7 +246,7 @@ export default function Ecomm() {
 
             <div className="d-flex flex-column gap-2 py-1">
               {results.map((item, i) => {
-                const { order_id, order_sn, model_image, buyer_name, buyer_image, src } = item
+                const { order_id, order_sn, shipping_trace_number, model_image, buyer_name, buyer_image, src } = item
 
                 return (
                   <div key={i} className="d-flex flex-row align-items-center bg-dark rounded shadow" onClick={() => handleSelect({ ...item, src })} style={{ cursor: "pointer" }}>
@@ -259,8 +261,8 @@ export default function Ecomm() {
                       />
                     </div>
                     <div className="col p-2">
-                      <p className="fw-bold m-0 text-light">{order_sn}</p>
-                      <p className="fw-bold m-0 text-secondary">{buyer_name}</p>
+                      <p className="fw-bold m-0 text-light">{shipping_trace_number}</p>
+                      <p className="fw-bold m-0 text-secondary">{order_sn}</p>
                     </div>
                   </div>
                 )
@@ -269,6 +271,12 @@ export default function Ecomm() {
           </div>
         </div>
 
+        <div className="form-group col d-flex gap-2 mb-2">
+          <div className="col form-group input-group-sm">
+            <label className="col-form-label px-1">Order SN</label>
+            <input type="text" className="form-control" placeholder="Shipping" value={orderSN} onChange={(e) => setOrderSN(e.target.value)} autoComplete="on" disabled={!edit} />
+          </div>
+        </div>
         <div className="form-group col d-flex gap-2 mb-2">
           <div className="col form-group input-group-sm">
             <label className="col-form-label px-1">Shipping</label>
@@ -320,6 +328,7 @@ export default function Ecomm() {
         {items.map((item) => (
           <ProductModelCard
             order_sn={orders.order_sn}
+            shipping_trace_number={orders.shipping_trace_number}
             status_info={orders.status_info_v2.status}
             shipping={orders.fulfillment_carrier_name}
             item={item}
