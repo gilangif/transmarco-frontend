@@ -23,27 +23,7 @@ export default function ModalContainer() {
   const { host } = useSelector((s) => s.config)
   const { barcode, modalForm } = useSelector((s) => s.ecomm)
 
-  const {
-    order_sn,
-    shipping_trace_number,
-    product_name,
-    variant_name,
-    item_id,
-    model_id,
-    sku_variant,
-    order_price,
-    amount,
-    status_info,
-    shipping,
-    artikel,
-    brand,
-    desc,
-    stock,
-    price,
-    netto,
-    promo,
-    size,
-  } = modalForm
+  const { order_sn, product_name, variant_name, item_id, model_id, sku_variant, order_price, amount, status_info, shipping, artikel, brand, desc, stock, price, netto, promo, size } = modalForm
 
   const [results, setResults] = useState([])
 
@@ -96,7 +76,7 @@ export default function ModalContainer() {
 
   const addForm = async () => {
     try {
-      const obj = { order_sn, shipping_trace_number, barcode, qty, sku_variant, product_name, variant_name, order_price, status_info, item_id, model_id, shipping, status, note }
+      const obj = { order_sn, shipping_trace_number: "-", barcode, qty, sku_variant, product_name, variant_name, order_price, status_info, item_id, model_id, shipping, status, note }
 
       const { data } = await axios.post(host + "/sheets/ecomm/add", obj, { headers: { Authorization: `Bearer ${accessToken}` } })
       const { success, message } = data || {}
@@ -175,7 +155,7 @@ export default function ModalContainer() {
         <div className="modal-content">
           <div className="modal-header">
             <h1 className="modal-title fs-5" id="modal-update">
-              {shipping_trace_number}
+              {order_sn}
             </h1>
             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>

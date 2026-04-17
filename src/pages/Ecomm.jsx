@@ -53,11 +53,11 @@ export default function Ecomm() {
   }
 
   const handleSelect = async (order) => {
-    const { order_id, order_sn, shipping_trace_number, model_image, buyer_name, buyer_image, src } = order
+    const { order_id, order_sn, model_image, buyer_name, buyer_image, src } = order
 
     isSelect.current = true
 
-    setKeyword(shipping_trace_number)
+    setKeyword(order_sn)
     setOrderSN(order_sn)
     setResults([])
 
@@ -66,7 +66,7 @@ export default function Ecomm() {
     const { shipping_address, status_info_v2, create_time, complete_time, shipping_confirm_time, seller_address, fulfillment_carrier_name, order_items, buyer_user } = detail
     const { user_name, user_id } = buyer_user || {}
 
-    setOrders({ ...detail, shipping_trace_number })
+    setOrders({ ...detail })
     setItems(order_items)
 
     if (user_id) setUserID(user_id)
@@ -123,9 +123,9 @@ export default function Ecomm() {
     try {
       if (!keyword) return
 
-      const { data } = await axios.post(host + "/shopee/order/search", { keyword, type: "no_resi" }, { headers: { Authorization: `Bearer ${accessToken}` } })
+      const { data } = await axios.post(host + "/shopee/order/search", { keyword, type: "no_pesanan" }, { headers: { Authorization: `Bearer ${accessToken}` } })
       const { shipping_trace_numbers_result, order_sn_result } = data || {}
-      const { total = 0, list = [] } = shipping_trace_numbers_result || {}
+      const { total = 0, list = [] } = order_sn_result || {}
 
       if (list.length === 0) {
         setSearchMessage(`Orders with keyword "${keyword}" not found`)
@@ -205,8 +205,8 @@ export default function Ecomm() {
                       <img src={src} alt={src} width="40" height="40" className="rounded object-fit-cover p-0" />
                     </div>
                     <div className="col p-2">
-                      <p className="fw-bold m-0 text-light">{shipping_trace_number}</p>
-                      <p className="fw-bold m-0 text-secondary">{order_sn}</p>
+                      <p className="fw-bold m-0 text-light">{order_sn}</p>
+                      <p className="fw-bold m-0 text-secondary">{buyer_name}</p>
                     </div>
                   </div>
                 )
@@ -261,8 +261,8 @@ export default function Ecomm() {
                       />
                     </div>
                     <div className="col p-2">
-                      <p className="fw-bold m-0 text-light">{shipping_trace_number}</p>
-                      <p className="fw-bold m-0 text-secondary">{order_sn}</p>
+                      <p className="fw-bold m-0 text-light">{order_sn}</p>
+                      <p className="fw-bold m-0 text-secondary">{buyer_name}</p>
                     </div>
                   </div>
                 )

@@ -6,7 +6,7 @@ import axios from "axios"
 
 import { setBarcode, setModalForm } from "../../store/ecomm.js"
 
-export default function ProductModelCard({ order_sn, shipping_trace_number, status_info, shipping, item, edit, onChange }) {
+export default function ProductModelCard({ order_sn, status_info, shipping, item, edit, onChange }) {
   const { amount, item_model, order_price, product, line_item_id } = item || {}
   const { name: product_name, images, item_id, sku: sku_parent } = product
   const { name: variant_name, model_id, weight, sku: sku_variant } = item_model || {}
@@ -17,7 +17,6 @@ export default function ProductModelCard({ order_sn, shipping_trace_number, stat
 
   const [form, setForm] = useState({
     order_sn: order_sn || "",
-    shipping_trace_number: shipping_trace_number || "",
     product_name: product_name || "",
     variant_name: variant_name || "",
     sku_parent: sku_parent || "",
