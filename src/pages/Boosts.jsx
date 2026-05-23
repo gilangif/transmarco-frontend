@@ -11,7 +11,7 @@ import BoostCard from "../components/shopee/BoostCard.jsx"
 import axios from "axios"
 
 export default function Boosts() {
-  const { username, accessToken } = useSelector((s) => s.auth)
+  const { username, brand, accessToken } = useSelector((s) => s.auth)
   const { host, navbar } = useSelector((s) => s.config)
 
   const [boosts, setBoosts] = useState([])
@@ -56,6 +56,16 @@ export default function Boosts() {
 
     getBoosts()
   }, [])
+
+  if (brand !== "HPAM" && brand !== "HPAL") {
+    return (
+      <div className="container vh-100 d-flex flex-column justify-content-center align-items-center gap-3">
+        <img src="https://media.tenor.com/0-nZoXEERuIAAAAi/skillissue.gif" alt="" srcset="" />
+        <h2 className="mt-5">You're not allowed access this page !</h2>
+        <p className="cl">slow hand dilarang buka hehe </p>
+      </div>
+    )
+  }
 
   return (
     <div className="row justify-content-start p-3 m-0 mb-3 nocursor">
